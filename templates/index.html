@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<button class="theme-toggle" id="theme-btn">🌙 Dark Mode</button>
+
+<div class="container">
+    <div class="header">
+        <h1>Spam Detector</h1>
+        <p class="subtitle">Enter a message to analyze its content</p>
+    </div>
+
+    <form id="analyze-form" action="/predict" method="POST">
+        <textarea name="message" placeholder="Type or paste your message here..." required></textarea>
+        
+        <button type="submit" id="submit-btn">
+            <span id="btn-text">Analyze Message</span>
+            <span id="btn-spinner" class="spinner"></span>
+        </button>
+    </form>
+
+    {% if error %}
+    <div class="result error-box fade-in">
+        <div class="error-icon">⚠️</div>
+        <h3>Oops! Something went wrong.</h3>
+        <p class="error-text">{{ error }}</p>
+        <button type="button" class="retry-btn" onclick="window.location.href='/'">Try Again</button>
+    </div>
+    {% endif %}
+
+    {% if prediction %}
+    <div class="result fade-in">
+        
+        <div class="badge-container">
+            <h2 class="badge {{ prediction|lower }}">{{ prediction }}</h2>
+        </div>
+
+        <div class="confidence-box">
+            <p>Confidence: <strong>{{ confidence }}%</strong></p>
+            <div class="bar">
+                <div class="fill {{ prediction|lower }}-fill" data-width="{{ confidence }}"></div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="section-block">
+            <h3>Model Predictions</h3>
+            <ul class="votes-list">
+                <li><span>Naive Bayes</span> <strong>{{ votes[0] }}</strong></li>
+                <li><span>Logistic Regression</span> <strong>{{ votes[1] }}</strong></li>
+                <li><span>SVM</span> <strong>{{ votes[2] }}</strong></li>
+            </ul>
+        </div>
+
+        <div class="section-block">
+            <h3>Top Influential Words</h3>
+            <ul class="chips-list">
+                {% for word, score in explanation %}
+                    <li>{{ word }} <span class="score">({{ "%.2f"|format(score) }})</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // --- Dark Mode Logic ---
+    const themeBtn = document.getElementById('theme-btn');
+    const htmlEl = document.documentElement;
+
+    // Check local storage for saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+        htmlEl.setAttribute('data-theme', 'dark');
+        themeBtn.innerText = '☀️ Light Mode';
+    }
+
+    themeBtn.addEventListener('click', () => {
+        if (htmlEl.getAttribute('data-theme') === 'light') {
+            htmlEl.setAttribute('data-theme', 'dark');
+            themeBtn.innerText = '☀️ Light Mode';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            htmlEl.setAttribute('data-theme', 'light');
+            themeBtn.innerText = '🌙 Dark Mode';
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    // --- Loading Spinner Logic ---
+    const form = document.getElementById('analyze-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    form.addEventListener('submit', () => {
+        // Disable button to prevent double submissions
+        submitBtn.disabled = true;
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.style.opacity = '0.8';
+        
+        // Swap text for spinner
+        btnText.innerText = 'Analyzing...';
+        btnSpinner.style.display = 'inline-block';
+    });
+
+    // --- Confidence Bar Animation ---
+    window.onload = () => {
+        document.querySelectorAll('.fill').forEach(el => {
+            let width = el.getAttribute('data-width');
+            setTimeout(() => {
+                el.style.width = width + '%';
+            }, 300); 
+        });
+    };
+</script>
+</body>
+</html>
