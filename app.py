@@ -1,14 +1,23 @@
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
+import os
 
 app = Flask(__name__)
 
 # Load models
-vectorizer = pickle.load(open("model/vectorizer.pkl", "rb"))
-nb = pickle.load(open("model/nb_model.pkl", "rb"))
-lr = pickle.load(open("model/lr_model.pkl", "rb"))
-svm = pickle.load(open("model/svm_model.pkl", "rb"))
+vectorizer = None
+nb = None
+lr = None
+svm = None
+
+def load_models():
+    global vectorizer, nb, lr, svm
+    if vectorizer is None:
+        vectorizer = pickle.load(open("model/vectorizer.pkl", "rb"))
+        nb = pickle.load(open("model/nb_model.pkl", "rb"))
+        lr = pickle.load(open("model/lr_model.pkl", "rb"))
+        svm = pickle.load(open("model/svm_model.pkl", "rb"))
 
 def explain(text):
     words = text.split()
@@ -28,6 +37,7 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    load_models()
     text = request.form['message']
 
     if not text.strip():
@@ -58,5 +68,10 @@ def predict():
         explanation=explanation
     )
 
+@app.rout('/test')
+def test():
+    return "App is working"
+
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT",10000))
+    app.run(host="0.0.0.0",port=port)
