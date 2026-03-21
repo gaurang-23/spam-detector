@@ -68,7 +68,7 @@ def predict():
         explanation=explanation
     )
 
-@app.rout('/test')
+@app.route('/test')
 def test():
     return "App is working"
 
