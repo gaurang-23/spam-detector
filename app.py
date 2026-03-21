@@ -10,16 +10,21 @@ vectorizer = None
 nb = None
 lr = None
 svm = None
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def load_models():
     global vectorizer, nb, lr, svm
     if vectorizer is None:
-        vectorizer = pickle.load(open("model/vectorizer.pkl", "rb"))
-        nb = pickle.load(open("model/nb_model.pkl", "rb"))
-        lr = pickle.load(open("model/lr_model.pkl", "rb"))
-        svm = pickle.load(open("model/svm_model.pkl", "rb"))
+        try:
+            vectorizer = pickle.load(open(os.path.join(BASE_DIR, "model/vectorizer.pkl"), "rb"))
+            nb = pickle.load(open(os.path.join(BASE_DIR, "model/nb_model.pkl"), "rb"))
+            lr = pickle.load(open(os.path.join(BASE_DIR, "model/lr_model.pkl"), "rb"))
+            svm = pickle.load(open(os.path.join(BASE_DIR, "model/svm_model.pkl"), "rb"))
+            print("Models loaded successfully")
+        except Exception as e:
+            print("Error loading models:", e)
 
 def explain(text):
+    load_models()
     words = text.split()
     word_scores = {}
 
