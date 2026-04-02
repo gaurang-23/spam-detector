@@ -15,6 +15,7 @@
     <div class="header">
         <h1>Spam Detector</h1>
         <p class="subtitle">Enter a message to analyze its content</p>
+        <button type="button" id="open-metrics" class="secondary-btn">View Model Analytics</button>
     </div>
 
     <form id="analyze-form" action="/predict" method="POST">
@@ -72,13 +73,30 @@
     </div>
     {% endif %}
 </div>
-
+<div id="metrics-modal" class="modal">
+    <div class="modal-content container">
+        <span class="close-btn" id="close-metrics">&times;</span>
+        <h2>Model Performance</h2>
+        <p class="subtitle">Training and evaluation metrics for our machine learning models.</p>
+        
+        <div class="graph-grid">
+            <div class="graph-card">
+                <img src="/static/accuracy_graph.png" alt="Accuracy Comparison">
+            </div>
+            <div class="graph-card">
+                <img src="/static/metrics_graph.png" alt="Metrics Comparison">
+            </div>
+            <div class="graph-card">
+                <img src="/static/confusion_matrix.png" alt="Confusion Matrix">
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     // --- Dark Mode Logic ---
     const themeBtn = document.getElementById('theme-btn');
     const htmlEl = document.documentElement;
 
-    // Check local storage for saved theme
     if (localStorage.getItem('theme') === 'dark') {
         htmlEl.setAttribute('data-theme', 'dark');
         themeBtn.innerText = '☀️ Light Mode';
@@ -98,30 +116,52 @@
 
     // --- Loading Spinner Logic ---
     const form = document.getElementById('analyze-form');
-    const submitBtn = document.getElementById('submit-btn');
-    const btnText = document.getElementById('btn-text');
-    const btnSpinner = document.getElementById('btn-spinner');
+    if (form) {
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
 
-    form.addEventListener('submit', () => {
-        // Disable button to prevent double submissions
-        submitBtn.disabled = true;
-        submitBtn.style.cursor = 'not-allowed';
-        submitBtn.style.opacity = '0.8';
-        
-        // Swap text for spinner
-        btnText.innerText = 'Analyzing...';
-        btnSpinner.style.display = 'inline-block';
-    });
+        form.addEventListener('submit', () => {
+            submitBtn.disabled = true;
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.style.opacity = '0.8';
+            
+            btnText.innerText = 'Analyzing...';
+            btnSpinner.style.display = 'inline-block';
+        });
+    }
 
     // --- Confidence Bar Animation ---
     window.onload = () => {
         document.querySelectorAll('.fill').forEach(el => {
             let width = el.getAttribute('data-width');
-            setTimeout(() => {
-                el.style.width = width + '%';
-            }, 300); 
+            if (width) {
+                setTimeout(() => {
+                    el.style.width = width + '%';
+                }, 300); 
+            }
         });
     };
+
+    // --- Metrics Modal Logic ---
+    const modal = document.getElementById('metrics-modal');
+    const openBtn = document.getElementById('open-metrics');
+    const closeBtn = document.getElementById('close-metrics');
+
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close if user clicks outside the modal
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>
