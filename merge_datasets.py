@@ -1,8 +1,7 @@
 import pandas as pd
 
-# =========================
 # 1. LOAD ENRON DATASET
-# =========================
+
 enron = pd.read_csv("dataset/enron_spam_data.csv")
 
 print("Enron columns:", enron.columns)
@@ -17,9 +16,7 @@ enron = enron.rename(columns={'Spam/Ham': 'label'})
 enron = enron[['label', 'text']]
 
 
-# =========================
 # 2. LOAD SPAMASSASSIN DATASET
-# =========================
 spamassassin = pd.read_csv("dataset/spam_assassin.csv")
 
 print("SpamAssassin columns:", spamassassin.columns)
@@ -31,9 +28,7 @@ spamassassin = spamassassin.rename(columns={'target': 'label'})
 spamassassin = spamassassin[['label', 'text']]
 
 
-# =========================
 # 3. LOAD SMS DATASET (spam.csv)
-# =========================
 sms = pd.read_csv("dataset/spam.csv", encoding='latin-1')
 
 print("SMS columns:", sms.columns)
@@ -47,10 +42,7 @@ sms = sms.rename(columns={
 # Keep required columns
 sms = sms[['label', 'text']]
 
-
-# =========================
 # STANDARDIZE LABELS
-# =========================
 def fix_labels(df):
     df['label'] = df['label'].astype(str).str.lower()
 
@@ -67,29 +59,20 @@ enron = fix_labels(enron)
 spamassassin = fix_labels(spamassassin)
 sms = fix_labels(sms)
 
-
-# =========================
 # MERGE ALL DATASETS
-# =========================
 df = pd.concat([enron, spamassassin, sms], ignore_index=True)
 
-
-# =========================
 # CLEAN DATA
-# =========================
 df.dropna(inplace=True)
 df.drop_duplicates(inplace=True)
 
 # Shuffle dataset
 df = df.sample(frac=1, random_state=42)
 
-
-# =========================
 # SAVE FINAL DATASET
-# =========================
 df.to_csv("dataset/final.csv", index=False)
 
-print("✅ Datasets merged successfully!")
+print("Datasets merged successfully!")
 print("Final shape:", df.shape)
 print("\nLabel distribution:")
 print(df['label'].value_counts())
